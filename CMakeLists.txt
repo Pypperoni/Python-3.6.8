@@ -32,6 +32,7 @@ endif()
 
 add_definitions(-DNDEBUG)
 add_definitions(-DPy_BUILD_CORE)
+add_definitions(-g)
 
 set(OBJECTS_FILES
     Objects/abstract.c
@@ -89,12 +90,9 @@ else()
 endif()
 
 set(PYTHON_FILES
-    Python/asdl.c
-    Python/ast.c
     Python/bltinmodule.c
     Python/ceval.c
     Python/codecs.c
-    Python/compile.c
     Python/dtoa.c
     Python/dup2.c
     Python/dynamic_annotations.c
@@ -103,23 +101,19 @@ set(PYTHON_FILES
     Python/fileutils.c
     Python/formatter_unicode.c
     Python/frozen.c
-    Python/frozenmain.c
-    Python/future.c
     Python/getargs.c
     Python/getcompiler.c
     Python/getcopyright.c
     Python/getopt.c
     Python/getplatform.c
     Python/getversion.c
-    Python/graminit.c
     Python/import.c
     Python/importdl.c
     Python/marshal.c
     Python/modsupport.c
+    Python/myreadline.c
     Python/mysnprintf.c
     Python/mystrtoul.c
-    Python/peephole.c
-    Python/pyarena.c
     Python/pyctype.c
     Python/pyfpe.c
     Python/pyhash.c
@@ -129,13 +123,11 @@ set(PYTHON_FILES
     Python/pystrcmp.c
     Python/pystrhex.c
     Python/pystrtod.c
-    Python/Python-ast.c
     Python/pythonrun.c
     Python/pytime.c
     Python/random.c
     Python/strdup.c
     Python/structmember.c
-    Python/symtable.c
     Python/sysmodule.c
     Python/thread.c
     Python/traceback.c
@@ -177,7 +169,6 @@ set(MODULES_FILES
     Modules/_localemodule.c
     Modules/_lsprof.c
     Modules/_lzmamodule.c
-    Modules/main.c
     Modules/_math.c
     Modules/mathmodule.c
     Modules/md5module.c
@@ -186,7 +177,6 @@ set(MODULES_FILES
     Modules/_opcode.c
     Modules/_operator.c
     Modules/ossaudiodev.c
-    Modules/parsermodule.c
     Modules/_pickle.c
     Modules/posixmodule.c
     Modules/_posixsubprocess.c
@@ -207,7 +197,6 @@ set(MODULES_FILES
     Modules/_ssl.c
     Modules/_stat.c
     Modules/_struct.c
-    Modules/symtablemodule.c
     Modules/syslogmodule.c
     Modules/termios.c
     Modules/_threadmodule.c
@@ -218,7 +207,6 @@ set(MODULES_FILES
     Modules/xxlimited.c
     Modules/xxmodule.c
     Modules/xxsubtype.c
-    Modules/zipimport.c
     Modules/zlibmodule.c
 
     Modules/_blake2/blake2module.c
@@ -269,23 +257,6 @@ if(NOT WIN32)
     )
 endif()
 
-set (PARSER_FILES
-    Parser/acceler.c
-    Parser/bitset.c
-    Parser/firstsets.c
-    Parser/grammar1.c
-    Parser/grammar.c
-    Parser/listnode.c
-    Parser/metagrammar.c
-    Parser/myreadline.c
-    Parser/node.c
-    Parser/parser.c
-    Parser/parsetok.c
-    Parser/printgrammar.c
-    Parser/tokenizer.c
-    Parser/tokenizer_pgen.c
-)
-
 include_directories(Include)
 include_directories(Python)
 if(WIN32)
@@ -300,12 +271,10 @@ endif()
 
 source_group("Python" FILES ${PYTHON_FILES})
 source_group("Modules" FILES ${MODULES_FILES})
-source_group("Parser" FILES ${PARSER_FILES})
 
 set(_FILES
     ${OBJECTS_FILES}
     ${PYTHON_FILES}
-    ${PARSER_FILES}
     ${MODULES_FILES}
 )
 

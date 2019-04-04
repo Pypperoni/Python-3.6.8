@@ -40,15 +40,12 @@ extern PyObject* PyInit__stat(void);
 extern PyObject* PyInit_time(void);
 extern PyObject* PyInit__locale(void);
 extern PyObject* PyInit__io(void);
-extern PyObject* PyInit_zipimport(void);
 extern PyObject* PyInit_faulthandler(void);
 extern PyObject* PyInit__tracemalloc(void);
-extern PyObject* PyInit__symtable(void);
 extern PyObject* PyInit_xxsubtype(void);
 
 extern PyObject* PyInit_mmap(void);
 extern PyObject* PyInit__csv(void);
-extern PyObject* PyInit_parser(void);
 extern PyObject* PyInit__struct(void);
 extern PyObject* PyInit__datetime(void);
 extern PyObject* PyInit__json(void);
@@ -76,7 +73,6 @@ extern PyObject* PyInit__codecs_tw(void);
 extern PyObject* PyMarshal_Init(void);
 extern PyObject* PyInit_imp(void);
 extern PyObject* PyInit_gc(void);
-extern PyObject* PyInit__ast(void);
 extern PyObject* _PyWarnings_Init(void);
 extern PyObject* PyInit__string(void);
 
@@ -124,10 +120,8 @@ struct _inittab _PyImport_Inittab[] = {
     {"time", PyInit_time},
     {"_locale", PyInit__locale},
     {"_io", PyInit__io},
-    {"zipimport", PyInit_zipimport},
     {"faulthandler", PyInit_faulthandler},
     {"_tracemalloc", PyInit__tracemalloc},
-    {"_symtable", PyInit__symtable},
     {"xxsubtype", PyInit_xxsubtype},
 
 
@@ -136,9 +130,6 @@ struct _inittab _PyImport_Inittab[] = {
 
     /* This lives in import.c */
     {"_imp", PyInit_imp},
-
-    /* This lives in Python/Python-ast.c */
-    {"_ast", PyInit__ast},
 
     /* These entries are here for sys.builtin_module_names */
     {"builtins", NULL},
@@ -161,7 +152,6 @@ struct _inittab _PyImport_Inittab[] = {
     {"_lsprof", PyInit__lsprof},
     {"mmap", PyInit_mmap},
     {"_csv", PyInit__csv},
-    {"parser", PyInit_parser},
     {"_struct", PyInit__struct},
     {"_datetime", PyInit__datetime},
     {"_json", PyInit__json},

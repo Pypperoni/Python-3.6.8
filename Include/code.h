@@ -150,6 +150,9 @@ PyAPI_FUNC(int) _PyCode_SetExtra(PyObject *code, Py_ssize_t index,
                                  void *extra);
 #endif
 
+/* Moved from compile.h */
+PyAPI_FUNC(PyObject*) _Py_Mangle(PyObject *p, PyObject *name);
+
 #ifdef __cplusplus
 }
 #endif

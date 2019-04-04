@@ -122,7 +122,6 @@
 
 #include "pystate.h"
 
-#include "pyarena.h"
 #include "modsupport.h"
 #include "pythonrun.h"
 #include "pylifecycle.h"
@@ -135,7 +134,7 @@
 #include "abstract.h"
 #include "bltinmodule.h"
 
-#include "compile.h"
+#include "code.h"
 #include "eval.h"
 
 #include "pyctype.h"

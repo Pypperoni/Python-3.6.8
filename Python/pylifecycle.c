@@ -2,16 +2,9 @@
 
 #include "Python.h"
 
-#include "Python-ast.h"
 #undef Yield /* undefine macro conflicting with winbase.h */
-#include "grammar.h"
-#include "node.h"
-#include "token.h"
-#include "parsetok.h"
 #include "errcode.h"
 #include "code.h"
-#include "symtable.h"
-#include "ast.h"
 #include "marshal.h"
 #include "osdefs.h"
 #include <locale.h>
@@ -47,8 +40,6 @@ extern "C" {
 #endif
 
 extern wchar_t *Py_GetPath(void);
-
-extern grammar _PyParser_Grammar; /* From graminit.c */
 
 /* Forward */
 static void initmain(PyInterpreterState *interp);
@@ -706,8 +697,6 @@ Py_FinalizeEx(void)
        - int and float free list blocks
        - whatever various modules and libraries allocate
     */
-
-    PyGrammar_RemoveAccelerators(&_PyParser_Grammar);
 
     /* Cleanup auto-thread-state */
 #ifdef WITH_THREAD

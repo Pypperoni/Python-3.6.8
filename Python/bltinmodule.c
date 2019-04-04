@@ -1,13 +1,8 @@
 /* Built-in functions */
 
 #include "Python.h"
-#include "Python-ast.h"
 
-#include "node.h"
 #include "code.h"
-
-#include "asdl.h"
-#include "ast.h"
 
 #include <ctype.h>
 
@@ -623,171 +618,81 @@ builtin_chr_impl(PyObject *module, int i)
     return PyUnicode_FromOrdinal(i);
 }
 
-
-static const char *
-source_as_string(PyObject *cmd, const char *funcname, const char *what, PyCompilerFlags *cf, PyObject **cmd_copy)
-{
-    const char *str;
-    Py_ssize_t size;
-    Py_buffer view;
-
-    *cmd_copy = NULL;
-    if (PyUnicode_Check(cmd)) {
-        cf->cf_flags |= PyCF_IGNORE_COOKIE;
-        str = PyUnicode_AsUTF8AndSize(cmd, &size);
-        if (str == NULL)
-            return NULL;
-    }
-    else if (PyBytes_Check(cmd)) {
-        str = PyBytes_AS_STRING(cmd);
-        size = PyBytes_GET_SIZE(cmd);
-    }
-    else if (PyByteArray_Check(cmd)) {
-        str = PyByteArray_AS_STRING(cmd);
-        size = PyByteArray_GET_SIZE(cmd);
-    }
-    else if (PyObject_GetBuffer(cmd, &view, PyBUF_SIMPLE) == 0) {
-        /* Copy to NUL-terminated buffer. */
-        *cmd_copy = PyBytes_FromStringAndSize(
-            (const char *)view.buf, view.len);
-        PyBuffer_Release(&view);
-        if (*cmd_copy == NULL) {
-            return NULL;
-        }
-        str = PyBytes_AS_STRING(*cmd_copy);
-        size = PyBytes_GET_SIZE(*cmd_copy);
-    }
-    else {
-        PyErr_Format(PyExc_TypeError,
-          "%s() arg 1 must be a %s object",
-          funcname, what);
-        return NULL;
-    }
-
-    if (strlen(str) != (size_t)size) {
-        PyErr_SetString(PyExc_ValueError,
-                        "source code string cannot contain null bytes");
-        Py_CLEAR(*cmd_copy);
-        return NULL;
-    }
-    return str;
-}
-
 /*[clinic input]
-compile as builtin_compile
-
+exec as builtin_exec
     source: object
-    filename: object(converter="PyUnicode_FSDecoder")
-    mode: str
-    flags: int = 0
-    dont_inherit: int(c_default="0") = False
-    optimize: int = -1
-
-Compile source into a code object that can be executed by exec() or eval().
-
-The source code may represent a Python module, statement or expression.
-The filename will be used for run-time error messages.
-The mode must be 'exec' to compile a module, 'single' to compile a
-single (interactive) statement, or 'eval' to compile an expression.
-The flags argument, if present, controls which future statements influence
-the compilation of the code.
-The dont_inherit argument, if true, stops the compilation inheriting
-the effects of any future statements in effect in the code calling
-compile; if absent or false these statements do influence the compilation,
-in addition to any features explicitly specified.
+    globals: object = None
+    locals: object = None
+    /
+Execute the given source in the context of globals and locals.
+The source may be a string representing one or more Python statements
+or a code object as returned by compile().
+The globals must be a dictionary and locals can be any mapping,
+defaulting to the current globals and locals.
+If only globals is given, locals defaults to it.
 [clinic start generated code]*/
 
 static PyObject *
-builtin_compile_impl(PyObject *module, PyObject *source, PyObject *filename,
-                     const char *mode, int flags, int dont_inherit,
-                     int optimize)
-/*[clinic end generated code: output=1fa176e33452bb63 input=9d53e8cfb3c86414]*/
+builtin_exec_impl(PyObject *module, PyObject *source, PyObject *globals,
+                  PyObject *locals)
+/*[clinic end generated code: output=3c90efc6ab68ef5d input=01ca3e1c01692829]*/
 {
-    PyObject *source_copy;
-    const char *str;
-    int compile_mode = -1;
-    int is_ast;
-    PyCompilerFlags cf;
-    int start[] = {Py_file_input, Py_eval_input, Py_single_input};
-    PyObject *result;
+    PyObject *v;
 
-    cf.cf_flags = flags | PyCF_SOURCE_IS_UTF8;
-
-    if (flags &
-        ~(PyCF_MASK | PyCF_MASK_OBSOLETE | PyCF_DONT_IMPLY_DEDENT | PyCF_ONLY_AST))
-    {
-        PyErr_SetString(PyExc_ValueError,
-                        "compile(): unrecognised flags");
-        goto error;
+    if (globals == Py_None) {
+        globals = PyEval_GetGlobals();
+        if (locals == Py_None) {
+            locals = PyEval_GetLocals();
+            if (locals == NULL)
+                return NULL;
+        }
+        if (!globals || !locals) {
+            PyErr_SetString(PyExc_SystemError,
+                            "globals and locals cannot be NULL");
+            return NULL;
+        }
     }
-    /* XXX Warn if (supplied_flags & PyCF_MASK_OBSOLETE) != 0? */
+    else if (locals == Py_None)
+        locals = globals;
 
-    if (optimize < -1 || optimize > 2) {
-        PyErr_SetString(PyExc_ValueError,
-                        "compile(): invalid optimize value");
-        goto error;
+    if (!PyDict_Check(globals)) {
+        PyErr_Format(PyExc_TypeError, "exec() globals must be a dict, not %.100s",
+                     globals->ob_type->tp_name);
+        return NULL;
+    }
+    if (!PyMapping_Check(locals)) {
+        PyErr_Format(PyExc_TypeError,
+            "locals must be a mapping or None, not %.100s",
+            locals->ob_type->tp_name);
+        return NULL;
+    }
+    if (_PyDict_GetItemIdWithError(globals, &PyId___builtins__) == NULL) {
+        if (_PyDict_SetItemId(globals, &PyId___builtins__,
+                              PyEval_GetBuiltins()) != 0)
+            return NULL;
+    }
+    else if (PyErr_Occurred()) {
+        return NULL;
     }
 
-    if (!dont_inherit) {
-        PyEval_MergeCompilerFlags(&cf);
+    if (PyCode_Check(source)) {
+        if (PyCode_GetNumFree((PyCodeObject *)source) > 0) {
+            PyErr_SetString(PyExc_TypeError,
+                "code object passed to exec() may not "
+                "contain free variables");
+            return NULL;
+        }
+        v = PyEval_EvalCode(source, globals, locals);
     }
-
-    if (strcmp(mode, "exec") == 0)
-        compile_mode = 0;
-    else if (strcmp(mode, "eval") == 0)
-        compile_mode = 1;
-    else if (strcmp(mode, "single") == 0)
-        compile_mode = 2;
     else {
-        PyErr_SetString(PyExc_ValueError,
-                        "compile() mode must be 'exec', 'eval' or 'single'");
-        goto error;
+        PyErr_SetString(PyExc_TypeError,
+            "exec() expects a code object");
+        return NULL;
     }
-
-    is_ast = PyAST_Check(source);
-    if (is_ast == -1)
-        goto error;
-    if (is_ast) {
-        if (flags & PyCF_ONLY_AST) {
-            Py_INCREF(source);
-            result = source;
-        }
-        else {
-            PyArena *arena;
-            mod_ty mod;
-
-            arena = PyArena_New();
-            if (arena == NULL)
-                goto error;
-            mod = PyAST_obj2mod(source, arena, compile_mode);
-            if (mod == NULL) {
-                PyArena_Free(arena);
-                goto error;
-            }
-            if (!PyAST_Validate(mod)) {
-                PyArena_Free(arena);
-                goto error;
-            }
-            result = (PyObject*)PyAST_CompileObject(mod, filename,
-                                                    &cf, optimize, arena);
-            PyArena_Free(arena);
-        }
-        goto finally;
-    }
-
-    str = source_as_string(source, "compile", "string, bytes or AST", &cf, &source_copy);
-    if (str == NULL)
-        goto error;
-
-    result = Py_CompileStringObject(str, filename, start[compile_mode], &cf, optimize);
-    Py_XDECREF(source_copy);
-    goto finally;
-
-error:
-    result = NULL;
-finally:
-    Py_DECREF(filename);
-    return result;
+    if (v == NULL)
+        return NULL;
+    Py_DECREF(v);
+    Py_RETURN_NONE;
 }
 
 /* AC: cannot convert yet, as needs PEP 457 group support in inspect */
@@ -831,180 +736,6 @@ builtin_divmod_impl(PyObject *module, PyObject *x, PyObject *y)
 {
     return PyNumber_Divmod(x, y);
 }
-
-
-/*[clinic input]
-eval as builtin_eval
-
-    source: object
-    globals: object = None
-    locals: object = None
-    /
-
-Evaluate the given source in the context of globals and locals.
-
-The source may be a string representing a Python expression
-or a code object as returned by compile().
-The globals must be a dictionary and locals can be any mapping,
-defaulting to the current globals and locals.
-If only globals is given, locals defaults to it.
-[clinic start generated code]*/
-
-static PyObject *
-builtin_eval_impl(PyObject *module, PyObject *source, PyObject *globals,
-                  PyObject *locals)
-/*[clinic end generated code: output=0a0824aa70093116 input=11ee718a8640e527]*/
-{
-    PyObject *result, *source_copy;
-    const char *str;
-    PyCompilerFlags cf;
-
-    if (locals != Py_None && !PyMapping_Check(locals)) {
-        PyErr_SetString(PyExc_TypeError, "locals must be a mapping");
-        return NULL;
-    }
-    if (globals != Py_None && !PyDict_Check(globals)) {
-        PyErr_SetString(PyExc_TypeError, PyMapping_Check(globals) ?
-            "globals must be a real dict; try eval(expr, {}, mapping)"
-            : "globals must be a dict");
-        return NULL;
-    }
-    if (globals == Py_None) {
-        globals = PyEval_GetGlobals();
-        if (locals == Py_None) {
-            locals = PyEval_GetLocals();
-            if (locals == NULL)
-                return NULL;
-        }
-    }
-    else if (locals == Py_None)
-        locals = globals;
-
-    if (globals == NULL || locals == NULL) {
-        PyErr_SetString(PyExc_TypeError,
-            "eval must be given globals and locals "
-            "when called without a frame");
-        return NULL;
-    }
-
-    if (_PyDict_GetItemId(globals, &PyId___builtins__) == NULL) {
-        if (_PyDict_SetItemId(globals, &PyId___builtins__,
-                              PyEval_GetBuiltins()) != 0)
-            return NULL;
-    }
-
-    if (PyCode_Check(source)) {
-        if (PyCode_GetNumFree((PyCodeObject *)source) > 0) {
-            PyErr_SetString(PyExc_TypeError,
-        "code object passed to eval() may not contain free variables");
-            return NULL;
-        }
-        return PyEval_EvalCode(source, globals, locals);
-    }
-
-    cf.cf_flags = PyCF_SOURCE_IS_UTF8;
-    str = source_as_string(source, "eval", "string, bytes or code", &cf, &source_copy);
-    if (str == NULL)
-        return NULL;
-
-    while (*str == ' ' || *str == '\t')
-        str++;
-
-    (void)PyEval_MergeCompilerFlags(&cf);
-    result = PyRun_StringFlags(str, Py_eval_input, globals, locals, &cf);
-    Py_XDECREF(source_copy);
-    return result;
-}
-
-/*[clinic input]
-exec as builtin_exec
-
-    source: object
-    globals: object = None
-    locals: object = None
-    /
-
-Execute the given source in the context of globals and locals.
-
-The source may be a string representing one or more Python statements
-or a code object as returned by compile().
-The globals must be a dictionary and locals can be any mapping,
-defaulting to the current globals and locals.
-If only globals is given, locals defaults to it.
-[clinic start generated code]*/
-
-static PyObject *
-builtin_exec_impl(PyObject *module, PyObject *source, PyObject *globals,
-                  PyObject *locals)
-/*[clinic end generated code: output=3c90efc6ab68ef5d input=01ca3e1c01692829]*/
-{
-    PyObject *v;
-
-    if (globals == Py_None) {
-        globals = PyEval_GetGlobals();
-        if (locals == Py_None) {
-            locals = PyEval_GetLocals();
-            if (locals == NULL)
-                return NULL;
-        }
-        if (!globals || !locals) {
-            PyErr_SetString(PyExc_SystemError,
-                            "globals and locals cannot be NULL");
-            return NULL;
-        }
-    }
-    else if (locals == Py_None)
-        locals = globals;
-
-    if (!PyDict_Check(globals)) {
-        PyErr_Format(PyExc_TypeError, "exec() globals must be a dict, not %.100s",
-                     globals->ob_type->tp_name);
-        return NULL;
-    }
-    if (!PyMapping_Check(locals)) {
-        PyErr_Format(PyExc_TypeError,
-            "locals must be a mapping or None, not %.100s",
-            locals->ob_type->tp_name);
-        return NULL;
-    }
-    if (_PyDict_GetItemId(globals, &PyId___builtins__) == NULL) {
-        if (_PyDict_SetItemId(globals, &PyId___builtins__,
-                              PyEval_GetBuiltins()) != 0)
-            return NULL;
-    }
-
-    if (PyCode_Check(source)) {
-        if (PyCode_GetNumFree((PyCodeObject *)source) > 0) {
-            PyErr_SetString(PyExc_TypeError,
-                "code object passed to exec() may not "
-                "contain free variables");
-            return NULL;
-        }
-        v = PyEval_EvalCode(source, globals, locals);
-    }
-    else {
-        PyObject *source_copy;
-        const char *str;
-        PyCompilerFlags cf;
-        cf.cf_flags = PyCF_SOURCE_IS_UTF8;
-        str = source_as_string(source, "exec",
-                                       "string, bytes or code", &cf,
-                                       &source_copy);
-        if (str == NULL)
-            return NULL;
-        if (PyEval_MergeCompilerFlags(&cf))
-            v = PyRun_StringFlags(str, Py_file_input, globals,
-                                  locals, &cf);
-        else
-            v = PyRun_String(str, Py_file_input, globals, locals);
-        Py_XDECREF(source_copy);
-    }
-    if (v == NULL)
-        return NULL;
-    Py_DECREF(v);
-    Py_RETURN_NONE;
-}
-
 
 /* AC: cannot convert yet, as needs PEP 457 group support in inspect */
 static PyObject *
@@ -2647,11 +2378,9 @@ static PyMethodDef builtin_methods[] = {
     BUILTIN_BIN_METHODDEF
     BUILTIN_CALLABLE_METHODDEF
     BUILTIN_CHR_METHODDEF
-    BUILTIN_COMPILE_METHODDEF
     BUILTIN_DELATTR_METHODDEF
     {"dir",             builtin_dir,        METH_VARARGS, dir_doc},
     BUILTIN_DIVMOD_METHODDEF
-    BUILTIN_EVAL_METHODDEF
     BUILTIN_EXEC_METHODDEF
     BUILTIN_FORMAT_METHODDEF
     {"getattr",         builtin_getattr,    METH_VARARGS, getattr_doc},

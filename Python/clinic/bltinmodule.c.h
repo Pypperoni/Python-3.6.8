@@ -149,37 +149,6 @@ PyDoc_STRVAR(builtin_compile__doc__,
 "compile; if absent or false these statements do influence the compilation,\n"
 "in addition to any features explicitly specified.");
 
-#define BUILTIN_COMPILE_METHODDEF    \
-    {"compile", (PyCFunction)builtin_compile, METH_FASTCALL, builtin_compile__doc__},
-
-static PyObject *
-builtin_compile_impl(PyObject *module, PyObject *source, PyObject *filename,
-                     const char *mode, int flags, int dont_inherit,
-                     int optimize);
-
-static PyObject *
-builtin_compile(PyObject *module, PyObject **args, Py_ssize_t nargs, PyObject *kwnames)
-{
-    PyObject *return_value = NULL;
-    static const char * const _keywords[] = {"source", "filename", "mode", "flags", "dont_inherit", "optimize", NULL};
-    static _PyArg_Parser _parser = {"OO&s|iii:compile", _keywords, 0};
-    PyObject *source;
-    PyObject *filename;
-    const char *mode;
-    int flags = 0;
-    int dont_inherit = 0;
-    int optimize = -1;
-
-    if (!_PyArg_ParseStack(args, nargs, kwnames, &_parser,
-        &source, PyUnicode_FSDecoder, &filename, &mode, &flags, &dont_inherit, &optimize)) {
-        goto exit;
-    }
-    return_value = builtin_compile_impl(module, source, filename, mode, flags, dont_inherit, optimize);
-
-exit:
-    return return_value;
-}
-
 PyDoc_STRVAR(builtin_divmod__doc__,
 "divmod($module, x, y, /)\n"
 "--\n"
@@ -205,44 +174,6 @@ builtin_divmod(PyObject *module, PyObject *args)
         goto exit;
     }
     return_value = builtin_divmod_impl(module, x, y);
-
-exit:
-    return return_value;
-}
-
-PyDoc_STRVAR(builtin_eval__doc__,
-"eval($module, source, globals=None, locals=None, /)\n"
-"--\n"
-"\n"
-"Evaluate the given source in the context of globals and locals.\n"
-"\n"
-"The source may be a string representing a Python expression\n"
-"or a code object as returned by compile().\n"
-"The globals must be a dictionary and locals can be any mapping,\n"
-"defaulting to the current globals and locals.\n"
-"If only globals is given, locals defaults to it.");
-
-#define BUILTIN_EVAL_METHODDEF    \
-    {"eval", (PyCFunction)builtin_eval, METH_VARARGS, builtin_eval__doc__},
-
-static PyObject *
-builtin_eval_impl(PyObject *module, PyObject *source, PyObject *globals,
-                  PyObject *locals);
-
-static PyObject *
-builtin_eval(PyObject *module, PyObject *args)
-{
-    PyObject *return_value = NULL;
-    PyObject *source;
-    PyObject *globals = Py_None;
-    PyObject *locals = Py_None;
-
-    if (!PyArg_UnpackTuple(args, "eval",
-        1, 3,
-        &source, &globals, &locals)) {
-        goto exit;
-    }
-    return_value = builtin_eval_impl(module, source, globals, locals);
 
 exit:
     return return_value;

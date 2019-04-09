@@ -10,7 +10,6 @@
 
 #include "Python.h"
 #include "longintrepr.h"
-#include "code.h"
 #include "marshal.h"
 #include "../Modules/hashtable.h"
 
@@ -46,7 +45,6 @@
 #define TYPE_TUPLE              '('
 #define TYPE_LIST               '['
 #define TYPE_DICT               '{'
-#define TYPE_CODE               'c'
 #define TYPE_UNICODE            'u'
 #define TYPE_UNKNOWN            '?'
 #define TYPE_SET                '<'
@@ -531,25 +529,6 @@ w_complex_object(PyObject *v, char flag, WFILE *p)
             p->error = WFERR_UNMARSHALLABLE;
             return;
         }
-    }
-    else if (PyCode_Check(v)) {
-        PyCodeObject *co = (PyCodeObject *)v;
-        W_TYPE(TYPE_CODE, p);
-        w_long(co->co_argcount, p);
-        w_long(co->co_kwonlyargcount, p);
-        w_long(co->co_nlocals, p);
-        w_long(co->co_stacksize, p);
-        w_long(co->co_flags, p);
-        w_object(co->co_code, p);
-        w_object(co->co_consts, p);
-        w_object(co->co_names, p);
-        w_object(co->co_varnames, p);
-        w_object(co->co_freevars, p);
-        w_object(co->co_cellvars, p);
-        w_object(co->co_filename, p);
-        w_object(co->co_name, p);
-        w_long(co->co_firstlineno, p);
-        w_object(co->co_lnotab, p);
     }
     else if (PyObject_CheckBuffer(v)) {
         /* Write unknown bytes-like objects as a bytes object */
@@ -1342,111 +1321,6 @@ r_object(RFILE *p)
                 v = r_ref_insert(v, idx, flag, p);
             retval = v;
         }
-        break;
-
-    case TYPE_CODE:
-        {
-            int argcount;
-            int kwonlyargcount;
-            int nlocals;
-            int stacksize;
-            int flags;
-            PyObject *code = NULL;
-            PyObject *consts = NULL;
-            PyObject *names = NULL;
-            PyObject *varnames = NULL;
-            PyObject *freevars = NULL;
-            PyObject *cellvars = NULL;
-            PyObject *filename = NULL;
-            PyObject *name = NULL;
-            int firstlineno;
-            PyObject *lnotab = NULL;
-
-            idx = r_ref_reserve(flag, p);
-            if (idx < 0)
-                break;
-
-            v = NULL;
-
-            /* XXX ignore long->int overflows for now */
-            argcount = (int)r_long(p);
-            if (PyErr_Occurred())
-                goto code_error;
-            kwonlyargcount = (int)r_long(p);
-            if (PyErr_Occurred())
-                goto code_error;
-            nlocals = (int)r_long(p);
-            if (PyErr_Occurred())
-                goto code_error;
-            stacksize = (int)r_long(p);
-            if (PyErr_Occurred())
-                goto code_error;
-            flags = (int)r_long(p);
-            if (PyErr_Occurred())
-                goto code_error;
-            code = r_object(p);
-            if (code == NULL)
-                goto code_error;
-            consts = r_object(p);
-            if (consts == NULL)
-                goto code_error;
-            names = r_object(p);
-            if (names == NULL)
-                goto code_error;
-            varnames = r_object(p);
-            if (varnames == NULL)
-                goto code_error;
-            freevars = r_object(p);
-            if (freevars == NULL)
-                goto code_error;
-            cellvars = r_object(p);
-            if (cellvars == NULL)
-                goto code_error;
-            filename = r_object(p);
-            if (filename == NULL)
-                goto code_error;
-            if (PyUnicode_CheckExact(filename)) {
-                if (p->current_filename != NULL) {
-                    if (!PyUnicode_Compare(filename, p->current_filename)) {
-                        Py_DECREF(filename);
-                        Py_INCREF(p->current_filename);
-                        filename = p->current_filename;
-                    }
-                }
-                else {
-                    p->current_filename = filename;
-                }
-            }
-            name = r_object(p);
-            if (name == NULL)
-                goto code_error;
-            firstlineno = (int)r_long(p);
-            if (firstlineno == -1 && PyErr_Occurred())
-                break;
-            lnotab = r_object(p);
-            if (lnotab == NULL)
-                goto code_error;
-
-            v = (PyObject *) PyCode_New(
-                            argcount, kwonlyargcount,
-                            nlocals, stacksize, flags,
-                            code, consts, names, varnames,
-                            freevars, cellvars, filename, name,
-                            firstlineno, lnotab);
-            v = r_ref_insert(v, idx, flag, p);
-
-          code_error:
-            Py_XDECREF(code);
-            Py_XDECREF(consts);
-            Py_XDECREF(names);
-            Py_XDECREF(varnames);
-            Py_XDECREF(freevars);
-            Py_XDECREF(cellvars);
-            Py_XDECREF(filename);
-            Py_XDECREF(name);
-            Py_XDECREF(lnotab);
-        }
-        retval = v;
         break;
 
     case TYPE_REF:

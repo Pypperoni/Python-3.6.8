@@ -18,6 +18,8 @@ struct _frame; /* Avoid including frameobject.h */
     struct _frame *prefix##_frame;                                          \
     /* True if generator is being executed. */                              \
     char prefix##_running;                                                  \
+    /* True if generator has yf on stack. */                                \
+    char prefix##_has_yf;                                                   \
     /* The code object backing the generator */                             \
     PyObject *prefix##_code;                                                \
     /* List of weak reference. */                                           \

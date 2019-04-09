@@ -889,14 +889,14 @@ update_code_filenames(PyCodeObject *co, PyObject *oldname, PyObject *newname)
     Py_INCREF(newname);
     Py_XSETREF(co->co_filename, newname);
 
-    constants = co->co_consts;
+    /*constants = co->co_consts;
     n = PyTuple_GET_SIZE(constants);
     for (i = 0; i < n; i++) {
         tmp = PyTuple_GET_ITEM(constants, i);
         if (PyCode_Check(tmp))
             update_code_filenames((PyCodeObject *)tmp,
                                   oldname, newname);
-    }
+    }*/
 }
 
 static void

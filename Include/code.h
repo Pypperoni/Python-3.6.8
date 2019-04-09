@@ -7,16 +7,6 @@
 extern "C" {
 #endif
 
-typedef uint16_t _Py_CODEUNIT;
-
-#ifdef WORDS_BIGENDIAN
-#  define _Py_OPCODE(word) ((word) >> 8)
-#  define _Py_OPARG(word) ((word) & 255)
-#else
-#  define _Py_OPCODE(word) ((word) & 255)
-#  define _Py_OPARG(word) ((word) >> 8)
-#endif
-
 /* Bytecode object */
 typedef struct {
     PyObject_HEAD
@@ -26,9 +16,6 @@ typedef struct {
     int co_stacksize;		/* #entries needed for evaluation stack */
     int co_flags;		/* CO_..., see below */
     int co_firstlineno;   /* first source line number */
-    PyObject *co_code;		/* instruction opcodes */
-    PyObject *co_consts;	/* list (constants used) */
-    PyObject *co_names;		/* list of strings (names used) */
     PyObject *co_varnames;	/* tuple of strings (local variable names) */
     PyObject *co_freevars;	/* tuple of strings (free variable names) */
     PyObject *co_cellvars;      /* tuple of strings (cell variable names) */
@@ -48,7 +35,12 @@ typedef struct {
        Type is a void* to keep the format private in codeobject.c to force
        people to go through the proper APIs. */
     void *co_extra;
+    PyObject* (*co_meth_ptr)(void*);
 } PyCodeObject;
+
+/* Creates a new empty code object with the specified source location. */
+PyAPI_FUNC(PyCodeObject *)
+PyCode_NewEmpty(const char *filename, const char *funcname, int firstlineno);
 
 /* Masks for co_flags above */
 #define CO_OPTIMIZED	0x0001
@@ -99,17 +91,6 @@ PyAPI_DATA(PyTypeObject) PyCode_Type;
 
 #define PyCode_Check(op) (Py_TYPE(op) == &PyCode_Type)
 #define PyCode_GetNumFree(op) (PyTuple_GET_SIZE((op)->co_freevars))
-
-/* Public interface */
-PyAPI_FUNC(PyCodeObject *) PyCode_New(
-	int, int, int, int, int, PyObject *, PyObject *,
-	PyObject *, PyObject *, PyObject *, PyObject *,
-	PyObject *, PyObject *, int, PyObject *);
-        /* same as struct above */
-
-/* Creates a new empty code object with the specified source location. */
-PyAPI_FUNC(PyCodeObject *)
-PyCode_NewEmpty(const char *filename, const char *funcname, int firstlineno);
 
 /* Return the line number associated with the specified bytecode index
    in this code object.  If you just need the line number of a frame,

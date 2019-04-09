@@ -33,14 +33,7 @@ PyFunction_NewWithQualName(PyObject *code, PyObject *globals, PyObject *qualname
     op->func_kwdefaults = NULL; /* No keyword only defaults */
     op->func_closure = NULL;
 
-    consts = ((PyCodeObject *)code)->co_consts;
-    if (PyTuple_Size(consts) >= 1) {
-        doc = PyTuple_GetItem(consts, 0);
-        if (!PyUnicode_Check(doc))
-            doc = Py_None;
-    }
-    else
-        doc = Py_None;
+    doc = Py_None;
     Py_INCREF(doc);
     op->func_doc = doc;
 

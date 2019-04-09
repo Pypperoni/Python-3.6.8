@@ -10,8 +10,8 @@ extern "C" {
 
 typedef struct {
     int b_type;                 /* what kind of block this is */
-    int b_handler;              /* where to jump to find handler */
     int b_level;                /* value stack level to pop to */
+    void* b_handler;            /* where to jump to find handler */
 } PyTryBlock;
 
 typedef struct _frame {
@@ -67,7 +67,7 @@ PyAPI_FUNC(PyFrameObject *) PyFrame_New(PyThreadState *, PyCodeObject *,
 
 /* Block management functions */
 
-PyAPI_FUNC(void) PyFrame_BlockSetup(PyFrameObject *, int, int, int);
+PyAPI_FUNC(void) PyFrame_BlockSetup(PyFrameObject *, int, void*, int);
 PyAPI_FUNC(PyTryBlock *) PyFrame_BlockPop(PyFrameObject *);
 
 /* Extend the value stack */

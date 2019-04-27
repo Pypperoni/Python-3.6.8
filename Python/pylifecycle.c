@@ -238,25 +238,9 @@ get_locale_encoding(void)
 static void
 import_init(PyInterpreterState *interp, PyObject *sysmod)
 {
-    PyObject *importlib;
     PyObject *impmod;
     PyObject *sys_modules;
     PyObject *value;
-
-    /* Import _importlib through its frozen version, _frozen_importlib. */
-    if (PyImport_ImportFrozenModule("_frozen_importlib") <= 0) {
-        Py_FatalError("Py_Initialize: can't import _frozen_importlib");
-    }
-    else if (Py_VerboseFlag) {
-        PySys_FormatStderr("import _frozen_importlib # frozen\n");
-    }
-    importlib = PyImport_AddModule("_frozen_importlib");
-    if (importlib == NULL) {
-        Py_FatalError("Py_Initialize: couldn't get _frozen_importlib from "
-                      "sys.modules");
-    }
-    interp->importlib = importlib;
-    Py_INCREF(interp->importlib);
 
     interp->import_func = PyDict_GetItemString(interp->builtins, "__import__");
     if (interp->import_func == NULL)
@@ -279,13 +263,6 @@ import_init(PyInterpreterState *interp, PyObject *sysmod)
         Py_FatalError("Py_Initialize: can't save _imp to sys.modules");
     }
 
-    /* Install importlib as the implementation of import */
-    value = PyObject_CallMethod(importlib, "_install", "OO", sysmod, impmod);
-    if (value == NULL) {
-        PyErr_Print();
-        Py_FatalError("Py_Initialize: importlib install failed");
-    }
-    Py_DECREF(value);
     Py_DECREF(impmod);
 
     _PyImportZip_Init();
@@ -946,24 +923,6 @@ initmain(PyInterpreterState *interp)
             Py_FatalError("Failed to initialize __main__.__builtins__");
         }
         Py_DECREF(bimod);
-    }
-    /* Main is a little special - imp.is_builtin("__main__") will return
-     * False, but BuiltinImporter is still the most appropriate initial
-     * setting for its __loader__ attribute. A more suitable value will
-     * be set if __main__ gets further initialized later in the startup
-     * process.
-     */
-    loader = PyDict_GetItemString(d, "__loader__");
-    if (loader == NULL || loader == Py_None) {
-        PyObject *loader = PyObject_GetAttrString(interp->importlib,
-                                                  "BuiltinImporter");
-        if (loader == NULL) {
-            Py_FatalError("Failed to retrieve BuiltinImporter");
-        }
-        if (PyDict_SetItemString(d, "__loader__", loader) < 0) {
-            Py_FatalError("Failed to initialize __main__.__loader__");
-        }
-        Py_DECREF(loader);
     }
 }
 

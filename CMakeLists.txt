@@ -283,6 +283,3 @@ if(WIN32)
 endif()
 
 add_library(python3.6 STATIC ${_FILES})
-
-add_executable(main main.c)
-target_link_libraries(main python3.6 m pthread util ${ZLIB_LIBRARY})

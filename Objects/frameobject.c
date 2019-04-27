@@ -30,7 +30,7 @@ frame_getlocals(PyFrameObject *f, void *closure)
 int
 PyFrame_GetLineNumber(PyFrameObject *f)
 {
-    return 0;
+    return f->f_lineno;
 }
 
 static PyObject *

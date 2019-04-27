@@ -96,7 +96,6 @@ PyInterpreterState_New(void)
         interp->codec_error_registry = NULL;
         interp->codecs_initialized = 0;
         interp->fscodec_initialized = 0;
-        interp->importlib = NULL;
         interp->import_func = NULL;
         interp->eval_frame = _PyEval_EvalFrameDefault;
         coextra->co_extra_user_count = 0;
@@ -137,7 +136,6 @@ PyInterpreterState_Clear(PyInterpreterState *interp)
     Py_CLEAR(interp->sysdict);
     Py_CLEAR(interp->builtins);
     Py_CLEAR(interp->builtins_copy);
-    Py_CLEAR(interp->importlib);
     Py_CLEAR(interp->import_func);
 }
 
@@ -955,5 +953,3 @@ PyGILState_Release(PyGILState_STATE oldstate)
 #ifdef __cplusplus
 }
 #endif
-
-

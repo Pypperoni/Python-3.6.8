@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+struct _frame;
+
 /* Bytecode object */
 typedef struct {
     PyObject_HEAD
@@ -35,8 +37,15 @@ typedef struct {
        Type is a void* to keep the format private in codeobject.c to force
        people to go through the proper APIs. */
     void *co_extra;
-    PyObject* (*co_meth_ptr)(void*);
+    PyObject* (*co_meth_ptr)(struct _frame*);
 } PyCodeObject;
+
+/* Public interface */
+PyAPI_FUNC(PyCodeObject *) PyCode_New(
+	   int, int, int, int, int, PyObject *, PyObject *,
+       PyObject *, PyObject *, PyObject *, PyObject *,
+	   PyObject *, PyObject *, int, PyObject *);
+       /* same as struct above */
 
 /* Creates a new empty code object with the specified source location. */
 PyAPI_FUNC(PyCodeObject *)

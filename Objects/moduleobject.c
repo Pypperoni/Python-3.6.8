@@ -673,8 +673,23 @@ module_repr(PyModuleObject *m)
 {
     PyThreadState *tstate = PyThreadState_GET();
     PyInterpreterState *interp = tstate->interp;
+    PyObject* mod_name;
+    static PyObject* format = NULL;
+    if (format == NULL)
+    {
+        format = PyUnicode_FromString("<module %s>");
+        if (format == NULL)
+            goto error;
+    }
 
-    return PyObject_CallMethod(interp->importlib, "_module_repr", "O", m);
+    _Py_IDENTIFIER(__name__);
+    mod_name = _PyDict_GetItemId(m->md_dict, &PyId___name__);
+    if (mod_name && PyUnicode_Check(mod_name)) {
+        return PyUnicode_Format(format, mod_name);
+    }
+
+error:
+    return NULL;
 }
 
 static PyObject*

@@ -85,38 +85,25 @@ def search_function(encoding):
     norm_encoding = normalize_encoding(encoding)
     aliased_encoding = _aliases.get(norm_encoding) or \
                        _aliases.get(norm_encoding.replace('.', '_'))
-    if aliased_encoding is not None:
-        modnames = [aliased_encoding,
-                    norm_encoding]
-    else:
-        modnames = [norm_encoding]
-    for modname in modnames:
-        if not modname or '.' in modname:
-            continue
-        try:
-            # Import is absolute to prevent the possibly malicious import of a
-            # module with side-effects that is not in the 'encodings' package.
-            mod = __import__('encodings.' + modname, fromlist=_import_tail,
-                             level=0)
-        except ImportError:
-            # ImportError may occur because 'encodings.(modname)' does not exist,
-            # or because it imports a name that does not exist (see mbcs and oem)
-            pass
-        else:
-            break
-    else:
-        mod = None
 
+    # Cache lookup
+    if aliased_encoding is not None:
+        entry = _cache.get(aliased_encoding, _unknown)
+        if entry is not _unknown:
+            return entry
+
+    entry = _cache.get(norm_encoding, _unknown)
+    if entry is not _unknown:
+        return entry
+
+    raise CodecRegistryError('%s not registered by codecs_index' % encoding)
+
+def register_mod(mod):
     try:
         getregentry = mod.getregentry
     except AttributeError:
         # Not a codec module
-        mod = None
-
-    if mod is None:
-        # Cache misses
-        _cache[encoding] = None
-        return None
+        return
 
     # Now ask the module for the registry entry
     entry = getregentry()
@@ -136,6 +123,7 @@ def search_function(encoding):
         entry = codecs.CodecInfo(*entry)
 
     # Cache the codec registry entry
+    encoding = entry.name
     _cache[encoding] = entry
 
     # Register its aliases (without overwriting previously registered

@@ -946,7 +946,7 @@
 #define HAVE_STDLIB_H 1
 
 /* Has stdatomic.h with atomic_int */
-#define HAVE_STD_ATOMIC 1
+/* #undef HAVE_STD_ATOMIC */
 
 /* Define to 1 if you have the `strdup' function. */
 #define HAVE_STRDUP 1

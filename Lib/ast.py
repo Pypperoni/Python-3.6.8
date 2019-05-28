@@ -24,7 +24,7 @@
     :copyright: Copyright 2008 by Armin Ronacher.
     :license: Python License.
 """
-from _ast import *
+#from _ast import *
 
 
 def parse(source, filename='<unknown>', mode='exec'):

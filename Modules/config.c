@@ -69,6 +69,7 @@ extern PyObject* PyInit__codecs_iso2022(void);
 extern PyObject* PyInit__codecs_jp(void);
 extern PyObject* PyInit__codecs_kr(void);
 extern PyObject* PyInit__codecs_tw(void);
+extern PyObject* PyInit_unicodedata(void);
 
 extern PyObject* PyMarshal_Init(void);
 extern PyObject* PyInit_imp(void);
@@ -164,6 +165,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"_codecs_jp", PyInit__codecs_jp},
     {"_codecs_kr", PyInit__codecs_kr},
     {"_codecs_tw", PyInit__codecs_tw},
+    {"unicodedata", PyInit_unicodedata},
 
     /* Sentinel */
     {0, 0}

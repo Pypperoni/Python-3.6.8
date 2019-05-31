@@ -17,6 +17,7 @@ extern PyObject* PyInit_audioop(void);
 #endif
 #else
 extern PyObject* PyInit_posix(void);
+extern PyObject* PyInit__posixsubprocess(void);
 extern PyObject* PyInit_pwd(void);
 #endif
 
@@ -26,6 +27,7 @@ extern PyObject* PyInit_cmath(void);
 extern PyObject* PyInit_math(void);
 extern PyObject* PyInit_array(void);
 extern PyObject* PyInit__thread(void);
+extern PyObject* PyInit_select(void);
 extern PyObject* PyInit_errno(void);
 extern PyObject* PyInit__sre(void);
 extern PyObject* PyInit__codecs(void);
@@ -89,9 +91,11 @@ struct _inittab _PyImport_Inittab[] = {
 #endif
 #else
     {"posix", PyInit_posix},
+    {"_posixsubprocess", PyInit__posixsubprocess},
     {"pwd", PyInit_pwd},
 #endif
 
+    {"select", PyInit_select},
     {"errno", PyInit_errno},
     {"array", PyInit_array},
     {"binascii", PyInit_binascii},

@@ -5,8 +5,8 @@ from . import machinery
 try:
     import _frozen_importlib
 except ImportError as exc:
-    if exc.name != '_frozen_importlib':
-        raise
+    #if exc.name != '_frozen_importlib':
+    #    raise
     _frozen_importlib = None
 try:
     import _frozen_importlib_external

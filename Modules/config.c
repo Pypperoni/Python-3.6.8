@@ -28,6 +28,7 @@ extern PyObject* PyInit_math(void);
 extern PyObject* PyInit_array(void);
 extern PyObject* PyInit__thread(void);
 extern PyObject* PyInit_select(void);
+extern PyObject* PyInit__socket(void);
 extern PyObject* PyInit_errno(void);
 extern PyObject* PyInit__sre(void);
 extern PyObject* PyInit__codecs(void);
@@ -96,6 +97,7 @@ struct _inittab _PyImport_Inittab[] = {
 #endif
 
     {"select", PyInit_select},
+    {"_socket", PyInit__socket},
     {"errno", PyInit_errno},
     {"array", PyInit_array},
     {"binascii", PyInit_binascii},

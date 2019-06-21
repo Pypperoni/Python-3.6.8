@@ -1,11 +1,6 @@
 /* pyconfig.h.  Generated from pyconfig.h.in by configure.  */
 /* pyconfig.h.in.  Generated from configure.ac by autoheader.  */
 
-
-#ifndef Py_PYCONFIG_H
-#define Py_PYCONFIG_H
-
-
 /* Define if building universal (internal helper macro) */
 /* #undef AC_APPLE_UNIVERSAL_BUILD */
 
@@ -1549,5 +1544,3 @@
 #endif
 
 #define PLATFORM "linux"
-
-#endif /*Py_PYCONFIG_H*/

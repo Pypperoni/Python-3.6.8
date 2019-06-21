@@ -20,10 +20,6 @@
 #include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
 
-#ifdef MS_WINDOWS
-#include <consoleapi.h>
-#endif
-
 /* Various interned strings */
 
 PyObject *_PyIO_str_close;

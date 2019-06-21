@@ -940,7 +940,7 @@ initfsencoding(PyInterpreterState *interp)
     else
     {
         Py_FileSystemDefaultEncoding = "utf-8";
-        Py_FileSystemDefaultEncodeErrors = "surrogatepass";
+        Py_FileSystemDefaultEncodeErrors = "surrogateescape";
     }
 #else
     if (Py_FileSystemDefaultEncoding == NULL)

@@ -1,6 +1,10 @@
 #ifndef Py_CONFIG_H
 #define Py_CONFIG_H
 
+#ifndef Py_NO_ENABLE_SHARED
+#define Py_NO_ENABLE_SHARED
+#endif
+
 #ifdef __linux
     #include "pyconfig_linux.h"
 
@@ -17,10 +21,6 @@
 
 #else
     #error "No pyconfig for your OS could be found."
-#endif
-
-#ifndef Py_NO_ENABLE_SHARED
-#define Py_NO_ENABLE_SHARED
 #endif
 
 #ifdef Py_ENABLE_SHARED

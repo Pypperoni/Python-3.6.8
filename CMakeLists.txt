@@ -1,18 +1,10 @@
 cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 project(python3.6)
 
-find_package(OpenSSL REQUIRED)
-if(NOT OPENSSL_FOUND)
-    message(FATAL_ERROR "You need OpenSSL headers to build this.")
-endif()
-
-find_package(ZLIB REQUIRED)
-if(NOT ZLIB_FOUND)
-    message(FATAL_ERROR "You need ZLIB headers to build this.")
-endif()
-
-include_directories(${OPENSSL_INCLUDE_DIR})
-include_directories(${ZLIB_INCLUDE_DIR})
+include_directories(Modules/expat)
+include_directories(Modules/thirdparty_headers/openssl)
+include_directories(Modules/thirdparty_headers/zlib)
+include_directories(Modules/thirdparty_headers/bzip2)
 
 if(WIN32)
     add_definitions(-DWIN32)
@@ -24,6 +16,7 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS "-O3")
+    add_definitions(-g)
 endif()
 
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -32,7 +25,6 @@ endif()
 
 add_definitions(-DNDEBUG)
 add_definitions(-DPy_BUILD_CORE)
-add_definitions(-g)
 
 set(OBJECTS_FILES
     Objects/abstract.c
@@ -94,7 +86,6 @@ set(PYTHON_FILES
     Python/ceval.c
     Python/codecs.c
     Python/dtoa.c
-    Python/dup2.c
     Python/dynamic_annotations.c
     Python/dynload_stub.c
     Python/errors.c
@@ -153,14 +144,11 @@ set(MODULES_FILES
     Modules/_elementtree.c
     Modules/errnomodule.c
     Modules/faulthandler.c
-    Modules/fcntlmodule.c
     Modules/fpectlmodule.c
     Modules/fpetestmodule.c
     Modules/_functoolsmodule.c
     Modules/gcmodule.c
-    Modules/_gdbmmodule.c
     Modules/getbuildinfo.c
-    Modules/grpmodule.c
     Modules/_hashopenssl.c
     Modules/hashtable.c
     Modules/_heapqmodule.c
@@ -168,23 +156,16 @@ set(MODULES_FILES
     Modules/_json.c
     Modules/_localemodule.c
     Modules/_lsprof.c
-    Modules/_lzmamodule.c
     Modules/_math.c
     Modules/mathmodule.c
     Modules/md5module.c
     Modules/mmapmodule.c
-    Modules/nismodule.c
     Modules/_opcode.c
     Modules/_operator.c
-    Modules/ossaudiodev.c
     Modules/_pickle.c
     Modules/posixmodule.c
-    Modules/_posixsubprocess.c
-    Modules/pwdmodule.c
     Modules/pyexpat.c
     Modules/_randommodule.c
-    Modules/readline.c
-    Modules/resource.c
     Modules/rotatingtree.c
     Modules/selectmodule.c
     Modules/sha1module.c
@@ -192,13 +173,10 @@ set(MODULES_FILES
     Modules/sha512module.c
     Modules/signalmodule.c
     Modules/socketmodule.c
-    Modules/spwdmodule.c
     Modules/_sre.c
     Modules/_ssl.c
     Modules/_stat.c
     Modules/_struct.c
-    Modules/syslogmodule.c
-    Modules/termios.c
     Modules/_threadmodule.c
     Modules/timemodule.c
     Modules/_tracemalloc.c
@@ -251,9 +229,29 @@ if(OSX)
     )
 endif()
 
-if(NOT WIN32)
+if(WIN32)
     list(APPEND MODULES_FILES
+        Modules/_io/winconsoleio.c
+    )
+else()
+    list(APPEND MODULES_FILES
+        Modules/fcntlmodule.c
+        Modules/_gdbmmodule.c
+        Modules/grpmodule.c
         Modules/getpath.c
+        Modules/_lzmamodule.c
+        Modules/nismodule.c
+        Modules/ossaudiodev.c
+        Modules/_posixsubprocess.c
+        Modules/pwdmodule.c
+        Modules/readline.c
+        Modules/resource.c
+        Modules/spwdmodule.c
+        Modules/syslogmodule.c
+        Modules/termios.c
+    )
+    list(APPEND PYTHON_FILES
+        Python/dup2.c
     )
 endif()
 

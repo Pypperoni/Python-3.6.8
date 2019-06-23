@@ -11,10 +11,10 @@
 #elif _WIN32
     #include "pyconfig_windows.h"
 
-/*
 #elif __APPLE__
-    #include "pyconfig_mac.h"
+    #include "pyconfig_osx.h"
 
+/*
 #elif ANDROID
     #include "pyconfig_android.h"
 */

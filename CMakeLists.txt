@@ -236,23 +236,27 @@ if(WIN32)
 else()
     list(APPEND MODULES_FILES
         Modules/fcntlmodule.c
-        Modules/_gdbmmodule.c
         Modules/grpmodule.c
         Modules/getpath.c
-        Modules/_lzmamodule.c
         Modules/nismodule.c
-        Modules/ossaudiodev.c
         Modules/_posixsubprocess.c
         Modules/pwdmodule.c
         Modules/readline.c
         Modules/resource.c
-        Modules/spwdmodule.c
         Modules/syslogmodule.c
         Modules/termios.c
     )
     list(APPEND PYTHON_FILES
         Python/dup2.c
     )
+    if (NOT OSX)
+        list(APPEND MODULES_FILES
+            Modules/_gdbmmodule.c
+            Modules/_lzmamodule.c
+            Modules/ossaudiodev.c
+            Modules/spwdmodule.c
+        )
+    endif()
 endif()
 
 include_directories(Include)

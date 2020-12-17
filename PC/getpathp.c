@@ -88,7 +88,9 @@
 #endif
 
 #include <windows.h>
+#ifndef __MINGW32__
 #include <Shlwapi.h>
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

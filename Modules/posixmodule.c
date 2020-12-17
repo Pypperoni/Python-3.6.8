@@ -176,6 +176,17 @@ corresponding Unix manual entries for more information on calls.");
 #define HAVE_CWAIT      1
 #define HAVE_FSYNC      1
 #define fsync _commit
+#ifdef __MINGW32__
+#define HAVE_UNISTD_H
+#define HAVE_GETPPID    1
+#define HAVE_GETLOGIN   1
+#define HAVE_SPAWNV     1
+#define HAVE_EXECV      1
+#define HAVE_PIPE       1
+#define HAVE_SYSTEM     1
+#define HAVE_CWAIT      1
+#define HAVE_FSYNC      1
+#define fsync _commit
 #else
 /* Unix functions that the configure script doesn't check for */
 #define HAVE_EXECV      1
@@ -195,6 +206,7 @@ corresponding Unix manual entries for more information on calls.");
 #define HAVE_WAIT       1
 #define HAVE_TTYNAME    1
 #endif  /* _MSC_VER */
+#endif  /* __MINGW32__ */
 #endif  /* ! __WATCOMC__ || __QNX__ */
 
 
@@ -204,7 +216,7 @@ module os
 [clinic start generated code]*/
 /*[clinic end generated code: output=da39a3ee5e6b4b0d input=94a0f0f978acae17]*/
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__MINGW32__)
 
 #if defined(__sgi)&&_COMPILER_VERSION>=700
 /* declare ctermid_r if compiling with MIPSPro 7.x in ANSI C mode
@@ -322,6 +334,13 @@ extern int lstat(const char *, struct stat *);
 static int win32_can_symlink = 0;
 #endif
 #endif /* _MSC_VER */
+
+#ifdef __MINGW32__
+#include <process.h>
+#include <windows.h>
+#include "osdefs.h"
+#define ALL_PROCESSOR_GROUPS 0xffff
+#endif
 
 #ifndef MAXPATHLEN
 #if defined(PATH_MAX) && PATH_MAX > 1024

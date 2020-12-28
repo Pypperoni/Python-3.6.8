@@ -964,7 +964,8 @@ are likely to work.
 /* #undef HAVE_STRLCPY */
 
 /* Define to 1 if you have the <stropts.h> header file. */
-#define HAVE_STROPTS_H 1
+/* NOTE: don't define this here; the CmakeLists.txt should define this on its own */
+/* #define HAVE_STROPTS_H 1 */
 
 /* Define to 1 if `pw_gecos' is a member of `struct passwd'. */
 #define HAVE_STRUCT_PASSWD_PW_GECOS 1

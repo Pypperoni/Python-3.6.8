@@ -176,18 +176,7 @@ corresponding Unix manual entries for more information on calls.");
 #define HAVE_CWAIT      1
 #define HAVE_FSYNC      1
 #define fsync _commit
-#ifdef __MINGW32__
-#define HAVE_UNISTD_H
-#define HAVE_GETPPID    1
-#define HAVE_GETLOGIN   1
-#define HAVE_SPAWNV     1
-#define HAVE_EXECV      1
-#define HAVE_PIPE       1
-#define HAVE_SYSTEM     1
-#define HAVE_CWAIT      1
-#define HAVE_FSYNC      1
-#define fsync _commit
-#else
+#elif !defined(__MINGW32__)
 /* Unix functions that the configure script doesn't check for */
 #define HAVE_EXECV      1
 #define HAVE_FORK       1
@@ -206,7 +195,6 @@ corresponding Unix manual entries for more information on calls.");
 #define HAVE_WAIT       1
 #define HAVE_TTYNAME    1
 #endif  /* _MSC_VER */
-#endif  /* __MINGW32__ */
 #endif  /* ! __WATCOMC__ || __QNX__ */
 
 

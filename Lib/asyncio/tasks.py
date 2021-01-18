@@ -6,7 +6,8 @@ __all__ = ['Task',
            'gather', 'shield', 'ensure_future', 'run_coroutine_threadsafe',
            ]
 
-import concurrent.futures
+# XXX PYPERRONI HACKS
+from concurrent import futures as concurrent_futures
 import functools
 import inspect
 import warnings
@@ -276,9 +277,9 @@ else:
 
 # wait() and as_completed() similar to those in PEP 3148.
 
-FIRST_COMPLETED = concurrent.futures.FIRST_COMPLETED
-FIRST_EXCEPTION = concurrent.futures.FIRST_EXCEPTION
-ALL_COMPLETED = concurrent.futures.ALL_COMPLETED
+FIRST_COMPLETED = concurrent_futures.FIRST_COMPLETED
+FIRST_EXCEPTION = concurrent_futures.FIRST_EXCEPTION
+ALL_COMPLETED = concurrent_futures.ALL_COMPLETED
 
 
 @coroutine
@@ -708,11 +709,11 @@ def shield(arg, *, loop=None):
 def run_coroutine_threadsafe(coro, loop):
     """Submit a coroutine object to a given event loop.
 
-    Return a concurrent.futures.Future to access the result.
+    Return a concurrent_futures.Future to access the result.
     """
     if not coroutines.iscoroutine(coro):
         raise TypeError('A coroutine object is required')
-    future = concurrent.futures.Future()
+    future = concurrent_futures.Future()
 
     def callback():
         try:

@@ -30,6 +30,19 @@ from .subprocess import *
 from .tasks import *
 from .transports import *
 
+# XXX PYPPERONI HACKS
+from . import base_events
+from . import coroutines
+from . import events
+from . import futures
+from . import locks
+from . import protocols
+from . import queues
+from . import streams
+from . import subprocess
+from . import tasks
+from . import transports
+
 __all__ = (base_events.__all__ +
            coroutines.__all__ +
            events.__all__ +
@@ -44,7 +57,9 @@ __all__ = (base_events.__all__ +
 
 if sys.platform == 'win32':  # pragma: no cover
     from .windows_events import *
+    from . import windows_events # XXX PYPPERONI HACKS
     __all__ += windows_events.__all__
 else:
     from .unix_events import *  # pragma: no cover
+    from . import unix_events # XXX PYPPERONI HACKS
     __all__ += unix_events.__all__

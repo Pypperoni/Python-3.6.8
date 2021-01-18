@@ -1,13 +1,14 @@
 __all__ = []
 
-import concurrent.futures._base
+# XXX PYPERRONI HACKS
+from concurrent.futures import _base, CancelledError, TimeoutError
 import reprlib
 
 from . import events
 
-Error = concurrent.futures._base.Error
-CancelledError = concurrent.futures.CancelledError
-TimeoutError = concurrent.futures.TimeoutError
+Error = _base.Error
+#CancelledError = concurrent.futures.CancelledError
+#TimeoutError = concurrent.futures.TimeoutError
 
 
 class InvalidStateError(Error):
